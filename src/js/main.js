@@ -367,7 +367,7 @@ function addNum (dir, callbacks) {
       for(var j=0; j<pan.length; j++) {
         temp[j] = pan[j][i];
       }
-      var _pos = [];
+      var _pos = []; // 通过_pos存储有变化的元素
 
       // 列相加
       if(dir === 'down') temp.reverse();
@@ -424,7 +424,7 @@ function addNum (dir, callbacks) {
     for(var i=0; i<pan.length; i++) {
 
       var temp = pan[i].slice();
-      var _pos = [];
+      var _pos = []; // 通过_pos存储有变化的元素
 
       // 相加逻辑
       if(dir === 'right') temp.reverse();

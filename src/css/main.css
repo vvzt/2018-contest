@@ -225,10 +225,6 @@ html, body {
   from { opacity: 1 }
   to { opacity: 0.5 }
 }*/
-@keyframes pop {
-  from { font-size: 2rem }
-  to { font-size: 3rem }
-}
 
 /* 移动一格 */
 @keyframes move1step_left {
