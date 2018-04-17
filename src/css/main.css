@@ -221,59 +221,65 @@ html, body {
 
 /* 动画部分 */
 
-@keyframes fadeIn {
-  from { opacity: 0 }
-  to { opacity: 1 }
+/*@keyframes fadeIn {
+  from { opacity: 1 }
+  to { opacity: 0.5 }
+}*/
+@keyframes pop {
+  from { font-size: 2rem }
+  to { font-size: 3rem }
 }
+
+/* 移动一格 */
 @keyframes move1step_left {
   from { transform: translate(0, 0) }
-  to { transform: translate(-6.75rem, 0) }
+  to { transform: translate(-6.5rem, 0) }
 }
 @keyframes move1step_right {
   from { transform: translate(0, 0) }
-  to { transform: translate(6.75rem, 0) }
+  to { transform: translate(6.5rem, 0) }
 }
 @keyframes move1step_up {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, -6.75rem) }
+  to { transform: translate(0, -6.5rem) }
 }
 @keyframes move1step_down {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, 6.75rem) }
+  to { transform: translate(0, 6.5rem) }
 }
 
-
+/* 移动两格 */
 @keyframes move2step_left {
   from { transform: translate(0, 0) }
-  to { transform: translate(-13rem, 0) }
+  to { transform: translate(-12.75rem, 0) }
 }
 @keyframes move2step_right {
   from { transform: translate(0, 0) }
-  to { transform: translate(13rem, 0) }
+  to { transform: translate(12.75rem, 0) }
 }
 @keyframes move2step_up {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, -13rem) }
+  to { transform: translate(0, -12.75rem) }
 }
 @keyframes move2step_down {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, 13rem) }
+  to { transform: translate(0, 12.75rem) }
 }
 
-
+/* 移动三格 */
 @keyframes move3step_left {
   from { transform: translate(0, 0) }
-  to { transform: translate(-19.5rem, 0) }
+  to { transform: translate(-19.25rem, 0) }
 }
 @keyframes move3step_right {
   from { transform: translate(0, 0) }
-  to { transform: translate(19.5rem, 0) }
+  to { transform: translate(19.25rem, 0) }
 }
 @keyframes move3step_up {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, -19.5rem) }
+  to { transform: translate(0, -19.25rem) }
 }
 @keyframes move3step_down {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, 19.5rem) }
+  to { transform: translate(0, 19.25rem) }
 }

@@ -358,7 +358,7 @@ var controlEvents = (function () {
   // 游戏逻辑
   // 传入 方向、回调数组
   // 回调函数将会在最后全部调用
-function addNum (dir, callback) {
+function addNum (dir, callbacks) {
   if(dir === 'up' || dir === 'down') {
 
     for(var i=0; i<pan[0].length; i++) {
@@ -377,7 +377,7 @@ function addNum (dir, callback) {
           
           if(temp[k] > 0) {
             if(temp[l] === temp[k]) {
-              _pos.push({ beforePos: l, afterPos: k });
+              _pos.push({ beforePos: l, afterPos: k, addition: true });
               temp[k] += temp[k];
               temp[l] = 0;
               score += temp[k];
@@ -385,7 +385,7 @@ function addNum (dir, callback) {
             } else if(temp[l] > 0) break;
           } else {
             if(temp[l] > 0) {
-              _pos.push({ beforePos: l, afterPos: k });
+              _pos.push({ beforePos: l, afterPos: k, addition: false });
               temp[k] += temp[l];
               temp[l] = 0;
               l = k+1;
@@ -476,5 +476,5 @@ function addNum (dir, callback) {
     } // for
   }
 
-  return callback.forEach(function (fn) { fn() });
+  return callbacks.forEach(function (fn) { fn() });
 }
