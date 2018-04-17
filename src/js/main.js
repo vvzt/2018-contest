@@ -1,16 +1,35 @@
 
+
 var pan = [
-  [0, 0, 0, 0],
-  [0, 0, 0, 0],
-  [0, 0, 0, 0],
-  [0, 0, 0, 0]
+  [128, 2, 4, 8],
+  [16, 32, 64, 128],
+  [256, 0, 512, 1024],
+  [32, 16, 8, 4]
 ];
+
+// var pan = [
+//   [0, 0, 0, 0],
+//   [0, 0, 0, 0],
+//   [0, 0, 0, 0],
+//   [0, 0, 0, 0]
+// ];
+
+// 存储各个节点
 var nodes = [
   [],
   [],
   [],
   []
-]
+];
+
+// mirror 为底
+var pan_mirror = [
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0],
+  [0, 0, 0, 0]
+];
+
 var score = 0; // 总分
 var config = {
   initCount: 4, // 初始化个数
@@ -28,24 +47,23 @@ var body = container.querySelector('#gameBody');
 var mirror = container.querySelector('.bodyMirror');
 var winner = container.querySelector('.winner');
 
-// var pan = [
-//   [1, 2, 4, 8],
-//   [16, 32, 64, 128],
-//   [256, 512, 1024, 2048],
-//   [32, 16, 8, 4]
-// ];
-
 
 
 
 
 window.onload = function () {
-  // 页面加载完毕后
-  // 绑定事件并初始化即可
-  panel.setPosition(JSON.parse(JSON.stringify(pan)), mirror); // mirror作底
+
+  // 绑定事件
   controlEvents.bindEvents();
-  panel.init(pan);
+
+  // 生成初始数字
+  // panel.init(pan);
+
+  // 更新位置
   panel.setPosition(pan, body);
+
+  // mirror当作底部
+  panel.setPosition(pan_mirror, mirror);
 
 }
 
@@ -76,7 +94,7 @@ var panel = (function watcher () {
     src.forEach(function (arr, i) {
       arr.forEach(function (x, j) {
         max = x > max ? x : max; // 同时获得最大值
-        zeroCount += x === 0 ? 1 : 0;
+        zeroCount = x === 0 ? zeroCount + 1 : zeroCount;
 
         var div = document.createElement('div');
         div.setAttribute('class', 'nodeNum' + ' num' + x);
@@ -128,14 +146,18 @@ var panel = (function watcher () {
   this.isEnding = function (src, dom, max, count) {
     if(max === MAX_NUM || count === 0) {
 
-      if(!isDead()) return;
+      if(!isDead(src)) return;
 
+      // 游戏结束 解绑事件
+      controlEvents.unBindEvents();
+
+      // 提示游戏结束的DOM生成
       var wrapper = document.createElement('div');
       var ins_el = document.createElement('p');
       var score_el = document.createElement('p');
       var confirm = document.createElement('input');
 
-      wrapper.setAttribute('class', 'endingWrapper');
+      wrapper.setAttribute('class', 'endingWrapper fadeIn');
       ins_el.setAttribute('class', 'endingWords');
       score_el.setAttribute('class', 'endingScore');
       confirm.setAttribute('class', 'endingConfirm');
@@ -148,10 +170,11 @@ var panel = (function watcher () {
       // 点击重开
       confirm.addEventListener('click', function () {
         panel.restart(src, dom);
-        winner.removeChild(wrapper);
         winner.style.display = 'none';
+        controlEvents.bindEvents();
       });
 
+      winner.innerHTML = '';
       ins_el.appendChild(score_el);
       wrapper.appendChild(ins_el);
       wrapper.appendChild(confirm);
@@ -176,7 +199,7 @@ var panel = (function watcher () {
         deadCount++;
       }
     }
-    console.log(deadCount);
+    // console.log(deadCount);
     return deadCount === src.length*src[0].length;
   }
 
@@ -228,13 +251,12 @@ var controlEvents = (function () {
       clearTimeout(fn);
       fn = null;
     }
-    return fn = setTimeout(addNum, 100, direction,
-      [ // 此数组中为addNum后 执行的callback函数
+    var callbacks = [ // 此数组中为addNum后 执行的callback函数
         function () { setTimeout(panel.generateNum, 50, pan, body) },
         function () { setTimeout(panel.setPosition, 50, pan, body) },
         function () { info.textContent = score }
-      ]
-    );
+      ];
+    return fn = setTimeout(addNum, 200, direction, callbacks);
   }
 
   // 初始化位置信息
@@ -358,21 +380,55 @@ var controlEvents = (function () {
   // 游戏逻辑
   // 传入 方向、回调数组
   // 回调函数将会在最后全部调用
-function addNum (dir, callbacks) {
-  if(dir === 'up' || dir === 'down') {
+  var calc = (function () {
 
-    for(var i=0; i<pan[0].length; i++) {
+    // 统计已改变的 行/列 数，若为0则不生成数字
+    this.changedCount = 0;
 
-      var temp = [];
-      for(var j=0; j<pan.length; j++) {
-        temp[j] = pan[j][i];
-      }
-      var _pos = []; // 通过_pos存储有变化的元素
+    this.addNum = function (dir, callbacks) {
 
-      // 列相加
-      if(dir === 'down') temp.reverse();
+      changedCount = 0;
+
+      for(var i=0; i<pan.length; i++) {
+
+        var temp = [];
+
+        // 获得当前列
+        if(dir === 'left' || dir === 'right') {
+          temp = pan[i].slice();
+        } else {
+          for(var j=0; j<pan.length; j++) { temp[j] = pan[j][i]; }
+        }
+
+        // 列相加
+        if(dir === 'down' || dir === 'right') temp.reverse();
+        
+        // 获得 存有数字位置变化 的数组
+        var _pos = getPosition(temp);
+
+        // 移动动画
+        setMoveAction(_pos, dir, i);
+
+        // 重置为0并重新赋值
+        if(dir === 'down' || dir === 'up') {
+          for(var k=0; k<pan.length; k++) { pan[k][i] = 0 }
+        } else {
+          pan[i].forEach(function (x, j) { pan[i][j] = 0 });
+        }
+        setValue(temp, _pos, dir, i);
+
+      } // for
+
+      return changedCount === 0 ? null : callbacks.forEach(function (fn) { fn() });
+    }
+
+    // 计算一行或一列中数字位置的变化
+    this.getPosition = function (temp) {
+      console.log(temp);
+       // 通过_pos存储有变化的元素
+      var _pos = [];
+
       for(var k=0; k<temp.length-1; k++) {
-
         for(var l=k+1; l<temp.length; l++) {
           
           if(temp[k] > 0) {
@@ -386,95 +442,80 @@ function addNum (dir, callbacks) {
           } else {
             if(temp[l] > 0) {
               _pos.push({ beforePos: l, afterPos: k, addition: false });
+              if(k===2) console.log(l, k);
               temp[k] += temp[l];
               temp[l] = 0;
-              l = k+1;
+              l = k + 1;
             }
-          } // if else
+          } // if
 
         } // for
-        
       } // for
 
-      _pos.forEach(function (pos, index) {
+      if(_pos.length !== 0) changedCount ++;
 
+      return _pos;
+    }
+
+    // 添加移动效果
+    this.setMoveAction = function (_pos, dir, dirIndex) {
+      _pos.forEach(function (pos) {
+
+        // 移动步数
         var stepCount = Math.abs(pos.beforePos - pos.afterPos);
-        if(dir === 'down') {
-          nodes[pan.length-pos.beforePos-1][i].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';
+        
+        // 判断走向
+        if(dir === 'up' || dir === 'down') {
+          var x1 = pan[0].length - 1 - pos.beforePos,
+            x2 = pos.beforePos,
+            y1 = dirIndex,
+            y2 = dirIndex;
         } else {
-          nodes[pos.beforePos][i].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';  
+          var x1 = dirIndex,
+            x2 = dirIndex,
+            y1 = pan[0].length - 1 - pos.beforePos,
+            y2 = pos.beforePos;
+        }
+
+        // 设置对应方向与步数的动画
+        if(dir === 'right' || dir === 'down') {
+          nodes[x1][y1].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';
+        } else {
+          nodes[x2][y2].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';  
         }
         
       });
+    }
 
-      // 计算结果后更改pan
-      for(var k=0; k<pan.length; k++) { pan[k][i] = 0 }
+    // 赋值
+    this.setValue = function (temp, _pos, dir, dirIndex) {
+
       temp.forEach(function (x, j) {
-        if(dir === 'down') {
-          pan[pan[0].length-j-1][i] = x;
-        } else {
-          pan[j][i] = x;
-        }
-      });
-
-    } // for
-
-  }
-  if(dir === 'left' || dir === 'right') {
-    for(var i=0; i<pan.length; i++) {
-
-      var temp = pan[i].slice();
-      var _pos = []; // 通过_pos存储有变化的元素
-
-      // 相加逻辑
-      if(dir === 'right') temp.reverse();
-      for(var k=0; k<temp.length-1; k++) {
-
-        for(var l=k+1; l<temp.length; l++) {
-          
-          if(temp[k] > 0) {
-            if(temp[l] === temp[k]) {
-              _pos.push({ beforePos: l, afterPos: k });
-              temp[k] += temp[k];
-              temp[l] = 0;
-              score += temp[k];
-              break;
-            } else if(temp[l] > 0) break;
-          } else {
-            if(temp[l] > 0) {
-              _pos.push({ beforePos: l, afterPos: k });
-              temp[k] += temp[l];
-              temp[l] = 0;
-              l = k+1;
-            }
-          } // if else
-
-        } // for
         
-      } // for
-
-      // 计算结果后更改pan
-      _pos.forEach(function (pos, index) {
-
-        var stepCount = Math.abs(pos.beforePos - pos.afterPos);
-        if(dir === 'right') {
-          nodes[i][pan[0].length-pos.beforePos-1].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';
+        // 判断走向
+        if(dir === 'up' || dir === 'down') {
+          var x1 = pan[0].length - 1 - j,
+            x2 = j,
+            y1 = dirIndex,
+            y2 = dirIndex;
         } else {
-          nodes[i][pos.beforePos].style.animation = 'move' + stepCount + 'step_' + dir + ' .2s forwards';  
+          var y1 = pan[0].length - 1 - j,
+            y2 = j,
+            x1 = dirIndex,
+            x2 = dirIndex;
         }
-        
-      });
-      pan[i].forEach(function (x, j) { pan[i][j] = 0 });
-      temp.forEach(function (x, j) {
-        if(dir === 'right') {
-          pan[i][pan.length-j-1] = x;
+
+        if(dir === 'down' || dir === 'right') {
+          pan[x1][y1] = x;
         } else {
-          pan[i][j] = x;
+          pan[x2][y2] = x;
         }
+
       });
 
-    } // for
-  }
+    }
 
-  return callbacks.forEach(function (fn) { fn() });
-}
+    return {
+      addNum: function () { return addNum(); }
+    }
+  })();
