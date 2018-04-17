@@ -3,7 +3,7 @@ html, body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background-color: #FAF8EF;
+  background-color: #CDB38B;
 }
 
 #wrapper {
@@ -44,9 +44,9 @@ html, body {
   width: 100%;
   max-width: 26rem;
   max-height: 26rem;
-  padding: 6px;
-  border-radius: 8px;
-  background-color: #BBADA0;
+  padding: 5px;
+  border: 2px solid #000;
+  background-color: transparent;
 }
 
 .nodeNum {
@@ -60,7 +60,7 @@ html, body {
   font-size: 2rem;
   font-weight: 500;
   border-radius: 3px;
-  background-color: #C6C6C6;
+  background-color: #A6A6A6;
 }
 
 #gameBody .nodeNum {
@@ -115,7 +115,7 @@ html, body {
   height: 5rem;
   color: #FFF;
   line-height: 2.5rem;
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 600;
   cursor: pointer;
   padding: 20px;
@@ -151,14 +151,14 @@ html, body {
 
 
 
-/* RESTART */
-.fadeIn {
-  animation: fadeIn .8s;
-}
 
 
 
 /* 数字 */
+
+.fadeIn {
+  animation: fadeIn .8s;
+}
 .num0 {
   background-color: rgba(198,198,198, 0.6);
 }
@@ -215,9 +215,6 @@ html, body {
 
 
 
-
-
-
 /* 动画部分 */
 
 @keyframes fadeIn {
@@ -264,17 +261,17 @@ html, body {
 /* 移动三格 */
 @keyframes move3step_left {
   from { transform: translate(0, 0) }
-  to { transform: translate(-19.25rem, 0) }
+  to { transform: translate(-19.3rem, 0) }
 }
 @keyframes move3step_right {
   from { transform: translate(0, 0) }
-  to { transform: translate(19.25rem, 0) }
+  to { transform: translate(19.3rem, 0) }
 }
 @keyframes move3step_up {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, -19.25rem) }
+  to { transform: translate(0, -19.3rem) }
 }
 @keyframes move3step_down {
   from { transform: translate(0, 0) }
-  to { transform: translate(0, 19.25rem) }
+  to { transform: translate(0, 19.3rem) }
 }
