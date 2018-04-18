@@ -65,7 +65,6 @@ window.onload = function () {
   // 更新位置
   panel.setPosition(pan, body);
 
-
 }
 
 
@@ -75,10 +74,10 @@ window.onload = function () {
 // 布局、状态 设置
 // 对游戏容器的初始化、修改等
 var panel = (function watcher () {
-  this.fn = null;
+  var fn = null;
 
   // 全部置0
-  this.setZero = function (src) {
+  function setZero (src) {
     src.forEach(function (arr, i) {
       arr.forEach(function (x, j) {
         src[i][j] = 0;
@@ -88,7 +87,7 @@ var panel = (function watcher () {
   }
 
   // 更新位置
-  this.setPosition = function (src, dom) {
+  function setPosition (src, dom) {
     var max = 0;
     var zeroCount = 0;
     var fragment = document.createDocumentFragment();
@@ -114,7 +113,7 @@ var panel = (function watcher () {
   }
 
   // 初始化
-  this.init = function (src) {
+  function init (src) {
     var count = config.initCount;
     src.forEach(function (arr, i) {
       arr.forEach(function (x, j) {
@@ -129,7 +128,7 @@ var panel = (function watcher () {
   }
 
   // 生成数字
-  this.generateNum = function (src) {
+  function generateNum (src) {
     var count = config.randomCount;
     var zeroCount = 0;
     src.forEach(function (arr, i) {
@@ -144,7 +143,7 @@ var panel = (function watcher () {
   }
 
   // 判断是否游戏结束
-  this.isEnding = function (src, dom, max, count) {
+  function isEnding (src, dom, max, count) {
     if(max === MAX_NUM || count === 0) {
 
       if(!isDead(src)) return;
@@ -189,7 +188,7 @@ var panel = (function watcher () {
   }
 
   // 判断是否死局
-  this.isDead = function (src) {
+  function isDead (src) {
     var deadCount = 0;
     for(var i=0; i<src.length; i++) {
       for(var j=0; j<src[0].length; j++) {
@@ -206,7 +205,7 @@ var panel = (function watcher () {
 
   return {
     init: function (src) { return init(src) },
-    setPosition: function (src, dom) { return fn = setTimeout(setPosition, 200, src, dom) },
+    setPosition: function (src, dom) { return fn = setTimeout(setPosition, 150, src, dom) },
     generateNum: function (src) { return generateNum(src) },
     restart: function (src, dom) {
       setZero(src);
@@ -227,18 +226,16 @@ var panel = (function watcher () {
 
 
 
-
-
 // 各种事件
 // PC、移动端兼容
-// 对外暴露绑定、解绑、动作方向接口
 var controlEvents = (function (src, dom) {
   this.isDown = false;
   this.isUp = false;
-  this.direction = null;
+  this.direction = null; // 方向
   this._temp_offset = { x: 0, y: 0 };
   this._temp_touch = { startX: 0, startY: 0 };
-  this.fn = null;
+  this.fn = null; // 去抖用
+  this.duration = 200; // 去抖间隔
 
 
   var mousedown = 'ontouchstart' in document ? 'touchstart' : 'mousedown';
@@ -257,7 +254,7 @@ var controlEvents = (function (src, dom) {
         function () { setTimeout(panel.setPosition, 30, src, dom) },
         function () { info.textContent = score }
       ];
-    return fn = setTimeout(addNum, 300, direction, callbacks);
+    return fn = setTimeout(calc.addNum, duration, direction, callbacks);
   }
 
   // 初始化位置信息
@@ -351,14 +348,14 @@ var controlEvents = (function (src, dom) {
 
 
   // 绑定
-  this.bindEvents = function () {
+  var bindEvents = function () {
     wrapper.addEventListener(mousedown, mousedown === 'mousedown' ? mousedownFn : touchdownFn);
     wrapper.addEventListener(mouseup, mouseup === 'mouseup' ? mouseupFn : touchupFn);
     wrapper.addEventListener(mousemove, mousemove === 'mousemove' ? mousemoveFn : touchmoveFn);
     document.onkeydown = 'onkeydown' in document ? keyboardFn : null;
   }
   // 解绑
-  this.unBindEvents = function () {
+  var unBindEvents = function () {
     wrapper.removeEventListener(mousedown, mousedown === 'mousedown' ? mousedownFn : touchdownFn);
     wrapper.removeEventListener(mouseup, mouseup === 'mouseup' ? mouseupFn : touchupFn);
     wrapper.removeEventListener(mousemove, mousemove === 'mousemove' ? mousemoveFn : touchmoveFn);
@@ -386,7 +383,7 @@ var calc = (function () {
   // 统计已改变的 行/列 数，若为0则不生成数字
   this.changedCount = 0;
 
-  this.addNum = function (dir, callbacks) {
+  function addNum (dir, callbacks) {
 
     changedCount = 0;
 
@@ -424,8 +421,8 @@ var calc = (function () {
   }
 
   // 计算一行或一列中数字位置的变化
-  this.getPosition = function (temp) {
-    console.log(temp);
+  function getPosition (temp) {
+
      // 通过_pos存储有变化的元素
     var _pos = [];
 
@@ -443,7 +440,6 @@ var calc = (function () {
         } else {
           if(temp[l] > 0) {
             _pos.push({ beforePos: l, afterPos: k, addition: false });
-            if(k===2) console.log(l, k);
             temp[k] += temp[l];
             temp[l] = 0;
             l = k + 1;
@@ -459,7 +455,7 @@ var calc = (function () {
   }
 
   // 添加移动效果
-  this.setMoveAction = function (_pos, dir, dirIndex) {
+  function setMoveAction (_pos, dir, dirIndex) {
     _pos.forEach(function (pos) {
 
       // 移动步数
@@ -489,7 +485,7 @@ var calc = (function () {
   }
 
   // 赋值
-  this.setValue = function (temp, _pos, dir, dirIndex) {
+  function setValue (temp, _pos, dir, dirIndex) {
 
     temp.forEach(function (x, j) {
       
@@ -517,6 +513,6 @@ var calc = (function () {
   }
 
   return {
-    addNum: function () { return addNum() }
+    addNum: function (direction, callbacks) { return addNum(direction, callbacks) }
   }
 })();

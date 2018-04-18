@@ -22,12 +22,12 @@ html, body {
   line-height: 2rem;
   text-align: center;
   color: #000;
-  z-index: 3;
+  z-index: 1;
 }
 .tips .info {
   font-size: 2rem;
   padding-left: 1rem;
-  text-shadow: 0 0 2rem #FFF;
+  text-shadow: 0 0 3rem #FFF;
 }
 
 #container {
